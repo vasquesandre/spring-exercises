@@ -1,6 +1,9 @@
 package br.andrevasques.spring_exercises.model.entitites;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "product")
@@ -10,8 +13,14 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @NotBlank
     private String name;
+
+    @Min(0)
     private double price;
+
+    @Min(0)
+    @Max(1)
     private double discount;
 
     public Product() {

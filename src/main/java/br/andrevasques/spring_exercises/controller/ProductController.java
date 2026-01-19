@@ -1,14 +1,16 @@
 package br.andrevasques.spring_exercises.controller;
 
-import br.andrevasques.spring_exercises.dto.CreateProductRequest;
+import br.andrevasques.spring_exercises.dto.product.CreateProductRequest;
+import br.andrevasques.spring_exercises.dto.product.ProductRequest;
+import br.andrevasques.spring_exercises.dto.product.UpdateProductRequest;
 import br.andrevasques.spring_exercises.model.entitites.Product;
 import br.andrevasques.spring_exercises.model.repositories.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Optional;
 
 @RestController
@@ -18,37 +20,90 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
-    @RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT })
-    public Product save(@RequestBody @Valid CreateProductRequest dto) {
+    @PostMapping
+    public ProductRequest save(@RequestBody @Valid CreateProductRequest dto) {
         Product product = Product.create(
                 dto.name(),
                 dto.price(),
                 dto.discount()
         );
-        return productRepository.save(product);
+        Product saved =  productRepository.save(product);
+
+        return new ProductRequest(
+                saved.getId(),
+                saved.getName(),
+                saved.getPrice(),
+                saved.getDiscount(),
+                saved.getFinalPrice()
+        );
+    }
+
+    @PatchMapping("/{id}")
+    public ProductRequest update(@PathVariable Integer id, @RequestBody UpdateProductRequest dto) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        product.update(dto.name(), dto.price(), dto.discount());
+        Product saved = productRepository.save(product);
+
+        return new ProductRequest(
+                saved.getId(),
+                saved.getName(),
+                saved.getPrice(),
+                saved.getDiscount(),
+                saved.getFinalPrice()
+        );
     }
 
     @GetMapping
-    public Iterable<Product> getProductsDefault() {
+    public Page<ProductRequest> getProductsDefault() {
         Pageable pageable = PageRequest.of(0, 10);
-        return productRepository.findAll(pageable);
+
+        return productRepository.findAll(pageable)
+                .map(product -> new ProductRequest(
+                        product.getId(),
+                        product.getName(),
+                        product.getPrice(),
+                        product.getDiscount(),
+                        product.getFinalPrice()
+                ));
     }
 
     @GetMapping("/page/{pageNumber}/{pageSize}")
-    public Iterable<Product> getProductsPageable(@PathVariable Integer pageNumber, @PathVariable Integer pageSize) {
+    public Page<ProductRequest> getProductsPageable(@PathVariable Integer pageNumber, @PathVariable Integer pageSize) {
         if(pageSize >= 20)  pageSize = 20;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return productRepository.findAll(pageable);
+        return productRepository.findAll(pageable)
+                .map(product -> new ProductRequest(
+                        product.getId(),
+                        product.getName(),
+                        product.getPrice(),
+                        product.getDiscount(),
+                        product.getFinalPrice()
+                ));
     }
 
     @GetMapping("/{id}")
-    public Optional<Product> getProductById(@PathVariable int id) {
-        return productRepository.findById(id);
+    public Optional<ProductRequest> getProductById(@PathVariable int id) {
+        return productRepository.findById(id)
+                .map(product -> new ProductRequest(
+                        product.getId(),
+                        product.getName(),
+                        product.getPrice(),
+                        product.getDiscount(),
+                        product.getFinalPrice()
+                ));
     }
 
     @GetMapping("/name")
-    public Iterable<Product> getProductsByName(@RequestParam String name) {
-        return productRepository.findByNameContaining(name);
+    public Page<ProductRequest> getProductsByName(@RequestParam String name) {
+        Pageable pageable = PageRequest.of(0, 10);
+        return productRepository.findByNameContaining(name, pageable)
+                .map(product -> new ProductRequest(
+                        product.getId(),
+                        product.getName(),
+                        product.getPrice(),
+                        product.getDiscount(),
+                        product.getFinalPrice()
+                ));
     }
 
     @DeleteMapping("/{id}")

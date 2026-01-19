@@ -1,4 +1,4 @@
-package br.andrevasques.spring_exercises.dto;
+package br.andrevasques.spring_exercises.dto.product;
 
 import jakarta.validation.constraints.NotBlank;
 

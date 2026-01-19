@@ -13,7 +13,7 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @NotBlank
     private String name;
@@ -42,11 +42,37 @@ public class Product {
         return new Product(name, price, discount);
     }
 
-    public int getId() {
+    public Product update(String name, BigDecimal price, BigDecimal discount) {
+        if(name != null && !name.isBlank()) {
+            this.name = name;
+        }
+
+        if(price != null) {
+            if(price.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Price must be greater than zero");
+            }
+            this.price = price;
+        }
+
+        if(discount != null) {
+            if(discount.compareTo(BigDecimal.ZERO) < 0 || discount.compareTo(BigDecimal.ONE) > 0) {
+                throw new IllegalArgumentException(("Discount must be between 0.0 and 1.0"));
+            }
+            this.discount = discount;
+        }
+
+        return this;
+    }
+
+    public BigDecimal getFinalPrice() {
+        return this.price.multiply(BigDecimal.ONE.subtract(this.discount));
+    }
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

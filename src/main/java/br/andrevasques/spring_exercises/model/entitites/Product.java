@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "product")
 public class Product {
@@ -16,20 +18,28 @@ public class Product {
     @NotBlank
     private String name;
 
-    @Min(0)
-    private double price;
-
-    @Min(0)
-    @Max(1)
-    private double discount;
+    private BigDecimal price;
+    private BigDecimal discount;
 
     public Product() {
     }
 
-    public Product(String name, double price, double discount) {
+    public Product(String name, BigDecimal price, BigDecimal discount) {
         this.name = name;
         this.price = price;
         this.discount = discount;
+    }
+
+    public static Product create(String name, BigDecimal price, BigDecimal discount) {
+        if(price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price must be greater than zero");
+        }
+
+        if(discount == null || discount.compareTo(BigDecimal.ZERO) < 0 || discount.compareTo(BigDecimal.ONE) > 0) {
+            throw new IllegalArgumentException(("Discount must be between 0.0 and 1.0"));
+        }
+
+        return new Product(name, price, discount);
     }
 
     public int getId() {
@@ -48,19 +58,19 @@ public class Product {
         this.name = name;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    public double getDiscount() {
+    public BigDecimal getDiscount() {
         return discount;
     }
 
-    public void setDiscount(double discount) {
+    public void setDiscount(BigDecimal discount) {
         this.discount = discount;
     }
 }

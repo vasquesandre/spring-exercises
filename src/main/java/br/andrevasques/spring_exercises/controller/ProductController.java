@@ -1,5 +1,6 @@
 package br.andrevasques.spring_exercises.controller;
 
+import br.andrevasques.spring_exercises.dto.CreateProductRequest;
 import br.andrevasques.spring_exercises.model.entitites.Product;
 import br.andrevasques.spring_exercises.model.repositories.ProductRepository;
 import jakarta.validation.Valid;
@@ -17,10 +18,14 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
-    @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
-    public Product saveProduct(@Valid Product product) {
-        productRepository.save(product);
-        return product;
+    @RequestMapping(method = { RequestMethod.POST, RequestMethod.PUT })
+    public Product save(@RequestBody @Valid CreateProductRequest dto) {
+        Product product = Product.create(
+                dto.name(),
+                dto.price(),
+                dto.discount()
+        );
+        return productRepository.save(product);
     }
 
     @GetMapping

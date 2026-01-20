@@ -65,6 +65,16 @@ public class ClientController {
                 ));
     }
 
+    @GetMapping("/cpf")
+    public ClientRequest getClientByCpf(@RequestParam String cpf) {
+        Client client = clientRepository.findByCpfContaining(cpf).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
+        return new ClientRequest(
+                client.getId(),
+                client.getName(),
+                client.getCpf()
+        );
+    }
+
     @GetMapping("/page/{pageNumber}/{pageSize}")
     public Page<ClientRequest> getClientsByPage(@PathVariable int pageNumber, @PathVariable int pageSize) {
         if(pageSize >= 20) pageSize = 20;

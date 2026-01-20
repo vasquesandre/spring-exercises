@@ -4,6 +4,7 @@ import br.andrevasques.spring_exercises.model.valueObjects.OrderItem;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "orders")
@@ -15,9 +16,16 @@ public class Order {
     private Client client;
     private List<OrderItem> items;
 
-    public Order(Client client, List<OrderItem> items) {
+    public Order(Client client) {
         this.client = client;
-        this.items = items;
+        this.items = new ArrayList<>();
+    }
+
+    public void addItem(OrderItem item) {
+        if(item.getQuantity() == null || item.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero.");
+        }
+        items.add(item);
     }
 
     public String getId() {

@@ -6,6 +6,8 @@ public class OrderItem {
     private String productId;
     private String name;
     private BigDecimal price;
+    private BigDecimal discount;
+    private BigDecimal finalPrice;
     private Integer quantity;
 
     public String getProductId() {
@@ -38,5 +40,21 @@ public class OrderItem {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(BigDecimal discount) {
+        this.discount = discount;
+    }
+
+    public BigDecimal getFinalPrice() {
+        return finalPrice;
+    }
+
+    public void setFinalPrice(BigDecimal finalPrice) {
+        this.finalPrice = finalPrice;
     }
 }

@@ -11,13 +11,25 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank
     private String name;
     private String cpf;
+
+    public Client() {
+    }
 
     public Client(String name, String cpf) {
         this.name = name;
         this.cpf = cpf;
+    }
+
+    public Client update(String name, String cpf) {
+        if(name != null) {
+            this.name = name;
+        }
+        if(cpf != null) {
+            this.cpf = cpf;
+        }
+        return this;
     }
 
     public Integer getId() {

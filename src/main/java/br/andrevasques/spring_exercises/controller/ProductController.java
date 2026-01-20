@@ -54,7 +54,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public Page<ProductRequest> getProductsDefault() {
+    public Page<ProductRequest> getProducts() {
         Pageable pageable = PageRequest.of(0, 10);
 
         return productRepository.findAll(pageable)
@@ -108,6 +108,7 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public void deleteProductsById(@PathVariable int id) {
-        productRepository.deleteById(id);
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        productRepository.deleteById(product.getId());
     }
 }

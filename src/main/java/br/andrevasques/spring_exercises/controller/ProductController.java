@@ -11,7 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
+import org.springframework.web.server.ResponseStatusException;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("/product")
@@ -38,26 +40,36 @@ public class ProductController {
         );
     }
 
-    @PatchMapping("/{id}")
-    public ProductRequest update(@PathVariable Integer id, @RequestBody UpdateProductRequest dto) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
-        product.update(dto.name(), dto.price(), dto.discount());
-        Product saved = productRepository.save(product);
-
-        return new ProductRequest(
-                saved.getId(),
-                saved.getName(),
-                saved.getPrice(),
-                saved.getDiscount(),
-                saved.getFinalPrice()
-        );
-    }
-
     @GetMapping
     public Page<ProductRequest> getProducts() {
         Pageable pageable = PageRequest.of(0, 10);
 
         return productRepository.findAll(pageable)
+                .map(product -> new ProductRequest(
+                        product.getId(),
+                        product.getName(),
+                        product.getPrice(),
+                        product.getDiscount(),
+                        product.getFinalPrice()
+                ));
+    }
+
+    @GetMapping("/{id}")
+    public ProductRequest getProductById(@PathVariable int id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
+        return new ProductRequest(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getDiscount(),
+                product.getFinalPrice()
+        );
+    }
+
+    @GetMapping("/name")
+    public Page<ProductRequest> getProductsByName(@RequestParam String name) {
+        Pageable pageable = PageRequest.of(0, 10);
+        return productRepository.findByNameContaining(name, pageable)
                 .map(product -> new ProductRequest(
                         product.getId(),
                         product.getName(),
@@ -81,34 +93,24 @@ public class ProductController {
                 ));
     }
 
-    @GetMapping("/{id}")
-    public Optional<ProductRequest> getProductById(@PathVariable int id) {
-        return productRepository.findById(id)
-                .map(product -> new ProductRequest(
-                        product.getId(),
-                        product.getName(),
-                        product.getPrice(),
-                        product.getDiscount(),
-                        product.getFinalPrice()
-                ));
-    }
+    @PatchMapping("/{id}")
+    public ProductRequest update(@PathVariable Integer id, @RequestBody UpdateProductRequest dto) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
+        product.update(dto.name(), dto.price(), dto.discount());
+        Product saved = productRepository.save(product);
 
-    @GetMapping("/name")
-    public Page<ProductRequest> getProductsByName(@RequestParam String name) {
-        Pageable pageable = PageRequest.of(0, 10);
-        return productRepository.findByNameContaining(name, pageable)
-                .map(product -> new ProductRequest(
-                        product.getId(),
-                        product.getName(),
-                        product.getPrice(),
-                        product.getDiscount(),
-                        product.getFinalPrice()
-                ));
+        return new ProductRequest(
+                saved.getId(),
+                saved.getName(),
+                saved.getPrice(),
+                saved.getDiscount(),
+                saved.getFinalPrice()
+        );
     }
 
     @DeleteMapping("/{id}")
     public void deleteProductsById(@PathVariable int id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
         productRepository.deleteById(product.getId());
     }
 }

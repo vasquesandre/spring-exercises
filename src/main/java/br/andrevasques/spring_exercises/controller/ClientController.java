@@ -11,7 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
+import org.springframework.web.server.ResponseStatusException;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping(path = "/client")
@@ -43,13 +45,13 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    public Optional<ClientRequest> getClientById(@PathVariable Integer id) {
-        return clientRepository.findById(id)
-                .map(client -> new ClientRequest(
-                        client.getId(),
-                        client.getName(),
-                        client.getCpf()
-                ));
+    public ClientRequest getClientById(@PathVariable Integer id) {
+        Client client = clientRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
+        return new ClientRequest(
+                client.getId(),
+                client.getName(),
+                client.getCpf()
+        );
     }
 
     @GetMapping("/name")
@@ -77,7 +79,7 @@ public class ClientController {
 
     @PatchMapping("/{id}")
     public ClientRequest update(@PathVariable Integer id, @RequestBody UpdateClientRequest dto) {
-        Client client = clientRepository.findById(id).orElseThrow(() -> new RuntimeException("Client not found"));
+        Client client = clientRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
         client.update(dto.name(), dto.cpf());
         Client saved = clientRepository.save(client);
         return new ClientRequest(
@@ -89,7 +91,7 @@ public class ClientController {
 
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable Integer id) {
-        Client client = clientRepository.findById(id).orElseThrow(() -> new RuntimeException("Client not found"));
+        Client client = clientRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
         clientRepository.delete(client);
     }
 }

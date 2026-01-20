@@ -45,7 +45,7 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    public ClientRequest getClientById(@PathVariable Integer id) {
+    public ClientRequest getClientById(@PathVariable String id) {
         Client client = clientRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
         return new ClientRequest(
                 client.getId(),
@@ -88,7 +88,7 @@ public class ClientController {
     }
 
     @PatchMapping("/{id}")
-    public ClientRequest update(@PathVariable Integer id, @RequestBody UpdateClientRequest dto) {
+    public ClientRequest update(@PathVariable String id, @RequestBody UpdateClientRequest dto) {
         Client client = clientRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
         client.update(dto.name(), dto.cpf());
         Client saved = clientRepository.save(client);
@@ -100,7 +100,7 @@ public class ClientController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Integer id) {
+    public void deleteById(@PathVariable String id) {
         Client client = clientRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
         clientRepository.delete(client);
     }

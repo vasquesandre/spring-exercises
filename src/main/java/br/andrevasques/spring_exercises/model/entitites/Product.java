@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 public class Product {
 
     @Id
-    private Integer id;
+    private String id;
 
     @NotBlank
     private String name;
@@ -65,11 +65,11 @@ public class Product {
         return this.price.multiply(BigDecimal.ONE.subtract(this.discount));
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 

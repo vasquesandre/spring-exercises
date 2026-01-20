@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface ProductRepository extends MongoRepository<Product, Integer> {
+public interface ProductRepository extends MongoRepository<Product, String> {
 
     public Page<Product> findByNameContaining(String name, Pageable pageable);
 }

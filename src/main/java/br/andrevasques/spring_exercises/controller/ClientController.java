@@ -31,54 +31,34 @@ public class ClientController {
     @PostMapping
     public ClientRequest save(@RequestBody @Valid CreateClientRequest dto) {
         Client saved = clientService.saveClient(dto);
-        return new ClientRequest(
-                saved.getId(),
-                saved.getName(),
-                saved.getCpf()
-        );
+        return new ClientRequest(saved);
     }
 
     @GetMapping
     public Page<ClientRequest> getClients() {
         Pageable pageable = PageRequest.of(0, 10);
         return clientService.getClients(pageable)
-                .map(client -> new ClientRequest(
-                        client.getId(),
-                        client.getName(),
-                        client.getCpf()
-                ));
+                .map(ClientRequest::new);
     }
 
     @GetMapping("/{id}")
     public ClientRequest getClientById(@PathVariable String id) {
         Client client = clientService.getClientById(id);
-        return new ClientRequest(
-                client.getId(),
-                client.getName(),
-                client.getCpf()
-        );
+        return new ClientRequest(client);
     }
 
     @GetMapping("/name")
     public Page<ClientRequest> getClientsByName(@RequestParam String name) {
         Pageable pageable = PageRequest.of(0, 10);
         return clientService.getClientsByNameContaining(name, pageable)
-                .map(client -> new ClientRequest(
-                        client.getId(),
-                        client.getName(),
-                        client.getCpf()
-                ));
+                .map(ClientRequest::new);
     }
 
     @GetMapping("/cpf")
     public Page<ClientRequest> getClientsByCpf(@RequestParam String cpf) {
         Pageable pageable = PageRequest.of(0, 10);
         return clientService.getClientsByCpfContaining(cpf, pageable)
-                .map(client -> new ClientRequest(
-                        client.getId(),
-                        client.getName(),
-                        client.getCpf()
-                ));
+                .map(ClientRequest::new);
     }
 
     @GetMapping("/page/{pageNumber}/{pageSize}")
@@ -86,21 +66,13 @@ public class ClientController {
         if(pageSize >= 20) pageSize = 20;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         return clientService.getClients(pageable)
-                .map(client -> new ClientRequest(
-                        client.getId(),
-                        client.getName(),
-                        client.getCpf()
-                ));
+                .map(ClientRequest::new);
     }
 
     @PatchMapping("/{id}")
     public ClientRequest update(@PathVariable String id, @RequestBody UpdateClientRequest dto) {
         Client saved = clientService.update(id, dto);
-        return new ClientRequest(
-                saved.getId(),
-                saved.getName(),
-                saved.getCpf()
-        );
+        return new ClientRequest(saved);
     }
 
     @DeleteMapping("/{id}")

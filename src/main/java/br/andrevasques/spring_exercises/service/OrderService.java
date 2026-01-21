@@ -9,7 +9,6 @@ import br.andrevasques.spring_exercises.model.repositories.ClientRepository;
 import br.andrevasques.spring_exercises.model.repositories.OrderRepository;
 import br.andrevasques.spring_exercises.model.repositories.ProductRepository;
 import br.andrevasques.spring_exercises.model.valueObjects.OrderItem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

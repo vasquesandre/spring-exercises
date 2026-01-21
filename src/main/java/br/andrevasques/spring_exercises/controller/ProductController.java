@@ -1,7 +1,7 @@
 package br.andrevasques.spring_exercises.controller;
 
 import br.andrevasques.spring_exercises.dto.product.CreateProductRequest;
-import br.andrevasques.spring_exercises.dto.product.ProductRequest;
+import br.andrevasques.spring_exercises.dto.product.ProductResponse;
 import br.andrevasques.spring_exercises.dto.product.UpdateProductRequest;
 import br.andrevasques.spring_exercises.model.entitites.Product;
 import br.andrevasques.spring_exercises.model.repositories.ProductRepository;
@@ -27,7 +27,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public ProductRequest save(@RequestBody @Valid CreateProductRequest dto) {
+    public ProductResponse save(@RequestBody @Valid CreateProductRequest dto) {
         Product product = Product.create(
                 dto.name(),
                 dto.price(),
@@ -35,7 +35,7 @@ public class ProductController {
         );
         Product saved =  productRepository.save(product);
 
-        return new ProductRequest(
+        return new ProductResponse(
                 saved.getId(),
                 saved.getName(),
                 saved.getPrice(),
@@ -45,11 +45,11 @@ public class ProductController {
     }
 
     @GetMapping
-    public Page<ProductRequest> getProducts() {
+    public Page<ProductResponse> getProducts() {
         Pageable pageable = PageRequest.of(0, 10);
 
         return productRepository.findAll(pageable)
-                .map(product -> new ProductRequest(
+                .map(product -> new ProductResponse(
                         product.getId(),
                         product.getName(),
                         product.getPrice(),
@@ -59,9 +59,9 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ProductRequest getProductById(@PathVariable String id) {
+    public ProductResponse getProductById(@PathVariable String id) {
         Product product = findProductByIdOrThrow(id);
-        return new ProductRequest(
+        return new ProductResponse(
                 product.getId(),
                 product.getName(),
                 product.getPrice(),
@@ -71,10 +71,10 @@ public class ProductController {
     }
 
     @GetMapping("/name")
-    public Page<ProductRequest> getProductsByName(@RequestParam String name) {
+    public Page<ProductResponse> getProductsByName(@RequestParam String name) {
         Pageable pageable = PageRequest.of(0, 10);
         return productRepository.findByNameContaining(name, pageable)
-                .map(product -> new ProductRequest(
+                .map(product -> new ProductResponse(
                         product.getId(),
                         product.getName(),
                         product.getPrice(),
@@ -84,11 +84,11 @@ public class ProductController {
     }
 
     @GetMapping("/page/{pageNumber}/{pageSize}")
-    public Page<ProductRequest> getProductsPageable(@PathVariable Integer pageNumber, @PathVariable Integer pageSize) {
+    public Page<ProductResponse> getProductsPageable(@PathVariable Integer pageNumber, @PathVariable Integer pageSize) {
         if(pageSize >= 20)  pageSize = 20;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         return productRepository.findAll(pageable)
-                .map(product -> new ProductRequest(
+                .map(product -> new ProductResponse(
                         product.getId(),
                         product.getName(),
                         product.getPrice(),
@@ -98,12 +98,12 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}")
-    public ProductRequest update(@PathVariable String id, @RequestBody UpdateProductRequest dto) {
+    public ProductResponse update(@PathVariable String id, @RequestBody UpdateProductRequest dto) {
         Product product = findProductByIdOrThrow(id);
         product.update(dto.name(), dto.price(), dto.discount());
         Product saved = productRepository.save(product);
 
-        return new ProductRequest(
+        return new ProductResponse(
                 saved.getId(),
                 saved.getName(),
                 saved.getPrice(),

@@ -1,7 +1,11 @@
 package br.andrevasques.spring_exercises.dto.order;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public record CreateOrderItemRequest(
-        String productId,
-        Integer quantity
+        @NotBlank String productId,
+        @NotNull @Min(1) Integer quantity
 ) {
 }

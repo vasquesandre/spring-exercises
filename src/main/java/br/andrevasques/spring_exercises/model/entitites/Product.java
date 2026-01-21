@@ -1,6 +1,5 @@
 package br.andrevasques.spring_exercises.model.entitites;
 
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,9 +11,7 @@ public class Product {
     @Id
     private String id;
 
-    @NotBlank
     private String name;
-
     private BigDecimal price;
     private BigDecimal discount;
 

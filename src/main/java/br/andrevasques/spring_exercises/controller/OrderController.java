@@ -6,6 +6,7 @@ import br.andrevasques.spring_exercises.model.entitites.Client;
 import br.andrevasques.spring_exercises.model.entitites.Order;
 import br.andrevasques.spring_exercises.service.ClientService;
 import br.andrevasques.spring_exercises.service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +29,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public OrderResponse save(@RequestBody CreateOrderRequest dto) {
+    public OrderResponse createOrder(@RequestBody @Valid CreateOrderRequest dto) {
         Order order = orderService.createOrder(dto);
         return toOrderResponse(order);
     }

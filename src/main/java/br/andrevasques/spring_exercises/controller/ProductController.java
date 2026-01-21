@@ -22,6 +22,10 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
+    private Product findProductByIdOrThrow(String productId) {
+        return productRepository.findById(productId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
+    }
+
     @PostMapping
     public ProductRequest save(@RequestBody @Valid CreateProductRequest dto) {
         Product product = Product.create(
@@ -56,7 +60,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ProductRequest getProductById(@PathVariable String id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
+        Product product = findProductByIdOrThrow(id);
         return new ProductRequest(
                 product.getId(),
                 product.getName(),
@@ -95,7 +99,7 @@ public class ProductController {
 
     @PatchMapping("/{id}")
     public ProductRequest update(@PathVariable String id, @RequestBody UpdateProductRequest dto) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
+        Product product = findProductByIdOrThrow(id);
         product.update(dto.name(), dto.price(), dto.discount());
         Product saved = productRepository.save(product);
 
@@ -110,7 +114,7 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public void deleteProductsById(@PathVariable String id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
+        Product product = findProductByIdOrThrow(id);
         productRepository.deleteById(product.getId());
     }
 }

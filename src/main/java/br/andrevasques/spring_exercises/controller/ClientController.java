@@ -4,7 +4,9 @@ import br.andrevasques.spring_exercises.dto.client.ClientRequest;
 import br.andrevasques.spring_exercises.dto.client.CreateClientRequest;
 import br.andrevasques.spring_exercises.dto.client.UpdateClientRequest;
 import br.andrevasques.spring_exercises.model.entitites.Client;
+import br.andrevasques.spring_exercises.model.entitites.Order;
 import br.andrevasques.spring_exercises.model.repositories.ClientRepository;
+import br.andrevasques.spring_exercises.model.repositories.OrderRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,6 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
@@ -21,6 +26,23 @@ public class ClientController {
 
     @Autowired
     private ClientRepository clientRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    private Client findClientByIdOrThrow(String clientId) {
+        return clientRepository.findById(clientId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found using ID"));
+    }
+
+    private Client findClientByCpfOrThrow(String cpf) {
+        return clientRepository.findByCpfContaining(cpf).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found using CPF"));
+    }
+
+    private void checkIfOrdersListIsNotEmptyForClientDeletionOrThrow(Page<Order> orders) {
+        if(!orders.isEmpty()) {
+            throw new ResponseStatusException(CONFLICT, "There is already an order with that client id");
+        }
+    }
 
     @PostMapping
     public ClientRequest save(@RequestBody @Valid CreateClientRequest dto) {
@@ -46,7 +68,7 @@ public class ClientController {
 
     @GetMapping("/{id}")
     public ClientRequest getClientById(@PathVariable String id) {
-        Client client = clientRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
+        Client client = findClientByIdOrThrow(id);
         return new ClientRequest(
                 client.getId(),
                 client.getName(),
@@ -67,7 +89,7 @@ public class ClientController {
 
     @GetMapping("/cpf")
     public ClientRequest getClientByCpf(@RequestParam String cpf) {
-        Client client = clientRepository.findByCpfContaining(cpf).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
+        Client client = findClientByCpfOrThrow(cpf);
         return new ClientRequest(
                 client.getId(),
                 client.getName(),
@@ -89,7 +111,7 @@ public class ClientController {
 
     @PatchMapping("/{id}")
     public ClientRequest update(@PathVariable String id, @RequestBody UpdateClientRequest dto) {
-        Client client = clientRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
+        Client client = findClientByIdOrThrow(id);
         client.update(dto.name(), dto.cpf());
         Client saved = clientRepository.save(client);
         return new ClientRequest(
@@ -101,7 +123,10 @@ public class ClientController {
 
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable String id) {
-        Client client = clientRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Order> orders = orderRepository.findAllByClientId(id, pageable);
+        checkIfOrdersListIsNotEmptyForClientDeletionOrThrow(orders);
+        Client client = findClientByIdOrThrow(id);
         clientRepository.delete(client);
     }
 }

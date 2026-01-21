@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -46,18 +45,37 @@ public class OrderController {
         return orderRepository.findById(orderId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found"));
     }
 
+    private Product findProductByIdOrThrow(String productId) {
+        return productRepository.findById(productId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
+    }
+
+    private void checkIfClientIdIsNullOrThrow(String clientId) {
+        if(clientId == null) {
+            throw new ResponseStatusException(BAD_REQUEST, "Client ID is null");
+        }
+    }
+
+    private void checkIfProductIdIsNullOrThrow(String productId) {
+        if(productId == null) {
+            throw new ResponseStatusException(BAD_REQUEST, "Product ID is null");
+        }
+    }
+
+    private void checkIfSaveItemsListIsNotEmptyOrThrow(List<CreateOrderItemRequest> items) {
+        if(items == null || items.isEmpty()) {
+            throw new ResponseStatusException(BAD_REQUEST, "Items list is empty");
+        }
+    }
+
     @PostMapping
     public OrderRequest save(@RequestBody CreateOrderRequest dto) {
-        if(dto.clientId() == null || dto.items().isEmpty()) {
-            throw new ResponseStatusException(BAD_REQUEST, "Client ID is null or items list is empty");
-        }
+        checkIfClientIdIsNullOrThrow(dto.clientId());
+        checkIfSaveItemsListIsNotEmptyOrThrow(dto.items());
         Client client = findClientByIdOrThrow(dto.clientId());
         Order order = new Order(client.getId());
         for (CreateOrderItemRequest createOrderItemRequest : dto.items()) {
-            if(createOrderItemRequest.productId() == null) {
-                throw new ResponseStatusException(BAD_REQUEST, "Product ID is null");
-            }
-            Product product = productRepository.findById(createOrderItemRequest.productId()).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found."));
+            checkIfProductIdIsNullOrThrow(createOrderItemRequest.productId());
+            Product product = findProductByIdOrThrow(createOrderItemRequest.productId());
             OrderItem orderItem = new OrderItem();
             orderItem.setProductId(product.getId());
             orderItem.setName(product.getName());
@@ -84,6 +102,7 @@ public class OrderController {
 
         return orderRepository.findAll(pageable)
                 .map(order -> {
+                    checkIfClientIdIsNullOrThrow(order.getClient());
                     Client client = findClientByIdOrThrow(order.getClient());
                     return new OrderRequest(
                             order.getId(),

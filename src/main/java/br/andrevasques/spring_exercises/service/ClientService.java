@@ -3,7 +3,6 @@ package br.andrevasques.spring_exercises.service;
 import br.andrevasques.spring_exercises.dto.client.CreateClientRequest;
 import br.andrevasques.spring_exercises.dto.client.UpdateClientRequest;
 import br.andrevasques.spring_exercises.model.entitites.Client;
-import br.andrevasques.spring_exercises.model.entitites.Order;
 import br.andrevasques.spring_exercises.model.repositories.ClientRepository;
 import br.andrevasques.spring_exercises.model.repositories.OrderRepository;
 import org.springframework.data.domain.Page;
@@ -60,7 +59,7 @@ public class ClientService {
         return findClientByCpfOrThrow(cpf, pageable);
     }
 
-    public Client update(String id, UpdateClientRequest dto) {
+    public Client updateClientById(String id, UpdateClientRequest dto) {
         Client client = findClientByIdOrThrow(id);
         client.update(dto.name(), dto.cpf());
         return clientRepository.save(client);

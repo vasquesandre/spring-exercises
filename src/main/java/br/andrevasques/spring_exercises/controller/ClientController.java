@@ -62,7 +62,7 @@ public class ClientController {
 
     @PatchMapping("/{id}")
     public ClientResponse update(@PathVariable String id, @RequestBody UpdateClientRequest dto) {
-        Client saved = clientService.update(id, dto);
+        Client saved = clientService.updateClientById(id, dto);
         return new ClientResponse(saved);
     }
 

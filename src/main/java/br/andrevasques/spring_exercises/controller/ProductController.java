@@ -4,117 +4,58 @@ import br.andrevasques.spring_exercises.dto.product.CreateProductRequest;
 import br.andrevasques.spring_exercises.dto.product.ProductResponse;
 import br.andrevasques.spring_exercises.dto.product.UpdateProductRequest;
 import br.andrevasques.spring_exercises.model.entitites.Product;
-import br.andrevasques.spring_exercises.model.repositories.ProductRepository;
+import br.andrevasques.spring_exercises.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("/product")
 public class ProductController {
 
     @Autowired
-    private ProductRepository productRepository;
-
-    private Product findProductByIdOrThrow(String productId) {
-        return productRepository.findById(productId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Product not found"));
-    }
+    private ProductService productService;
 
     @PostMapping
     public ProductResponse save(@RequestBody @Valid CreateProductRequest dto) {
-        Product product = Product.create(
-                dto.name(),
-                dto.price(),
-                dto.discount()
-        );
-        Product saved =  productRepository.save(product);
+        Product saved = productService.createProduct(dto);
 
-        return new ProductResponse(
-                saved.getId(),
-                saved.getName(),
-                saved.getPrice(),
-                saved.getDiscount(),
-                saved.getFinalPrice()
-        );
+        return new ProductResponse(saved);
     }
 
     @GetMapping
-    public Page<ProductResponse> getProducts() {
-        Pageable pageable = PageRequest.of(0, 10);
-
-        return productRepository.findAll(pageable)
-                .map(product -> new ProductResponse(
-                        product.getId(),
-                        product.getName(),
-                        product.getPrice(),
-                        product.getDiscount(),
-                        product.getFinalPrice()
-                ));
+    public Page<ProductResponse> getProducts(Pageable pageable) {
+        return productService.getProducts(pageable)
+                .map(ProductResponse::new);
     }
 
     @GetMapping("/{id}")
     public ProductResponse getProductById(@PathVariable String id) {
-        Product product = findProductByIdOrThrow(id);
-        return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getPrice(),
-                product.getDiscount(),
-                product.getFinalPrice()
-        );
+        Product product = productService.getProductById(id);
+
+        return new ProductResponse(product);
     }
 
     @GetMapping("/name")
     public Page<ProductResponse> getProductsByName(@RequestParam String name) {
         Pageable pageable = PageRequest.of(0, 10);
-        return productRepository.findByNameContaining(name, pageable)
-                .map(product -> new ProductResponse(
-                        product.getId(),
-                        product.getName(),
-                        product.getPrice(),
-                        product.getDiscount(),
-                        product.getFinalPrice()
-                ));
-    }
 
-    @GetMapping("/page/{pageNumber}/{pageSize}")
-    public Page<ProductResponse> getProductsPageable(@PathVariable Integer pageNumber, @PathVariable Integer pageSize) {
-        if(pageSize >= 20)  pageSize = 20;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return productRepository.findAll(pageable)
-                .map(product -> new ProductResponse(
-                        product.getId(),
-                        product.getName(),
-                        product.getPrice(),
-                        product.getDiscount(),
-                        product.getFinalPrice()
-                ));
+        return productService.getProductsByNameContaining(name, pageable)
+                .map(ProductResponse::new);
     }
 
     @PatchMapping("/{id}")
     public ProductResponse update(@PathVariable String id, @RequestBody UpdateProductRequest dto) {
-        Product product = findProductByIdOrThrow(id);
-        product.update(dto.name(), dto.price(), dto.discount());
-        Product saved = productRepository.save(product);
+        Product saved = productService.updateProductById(id, dto);
 
-        return new ProductResponse(
-                saved.getId(),
-                saved.getName(),
-                saved.getPrice(),
-                saved.getDiscount(),
-                saved.getFinalPrice()
-        );
+        return new ProductResponse(saved);
     }
 
     @DeleteMapping("/{id}")
     public void deleteProductsById(@PathVariable String id) {
-        Product product = findProductByIdOrThrow(id);
-        productRepository.deleteById(product.getId());
+        productService.deleteProductById(id);
     }
 }

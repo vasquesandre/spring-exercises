@@ -1,20 +1,21 @@
 # Spring Orders System (MongoDB)
 
 **Spring Orders System** is a backend learning project developed in **Java** using **Spring Boot** and **MongoDB**.  
-The main goal of this project is to practice **Domain-Driven Design (DDD) concepts**, **DTO-based APIs**, and **document-oriented modeling**, focusing on clean code, clear responsibilities, and real-world backend patterns.
+The goal of this project is to practice **clean REST API design**, **Domain-Driven Design (DDD) concepts**, and **real-world backend patterns**, focusing on clear responsibilities, validation, and evolvable architecture.
 
 ---
 
 ## Features Implemented
 
-- Client, Product, and Order creation
+- Client, Product, and Order management
 - Order creation using request DTOs
-- Order item management using a **Value Object (`OrderItem`)**
-- Calculation of final price using `BigDecimal`
-- Validation of business rules at API boundaries
-- Prevention of invalid orders (missing client, empty items, invalid products)
-- Pagination support for listing orders
+- Order item modeling using a **Value Object (`OrderItem`)**
+- Price and total calculation using `BigDecimal`
+- Validation using Bean Validation (`@Valid`, `@NotNull`, `@NotBlank`, etc.)
+- Business rule validation with proper HTTP status codes
+- Pagination support with Spring Data `Pageable`
 - MongoDB integration with Spring Data
+- Clear separation between Controller, Service, and Domain layers
 
 ---
 
@@ -36,50 +37,65 @@ The main goal of this project is to practice **Domain-Driven Design (DDD) concep
 3. An **Order** is created for a client using a request DTO
 4. Products are added to the order via a list of items:
    - Each item references a product by ID
-   - Quantity and final price are calculated during order creation
-5. Orders can be listed with pagination
+   - Quantity validation is applied
+   - Final price is calculated during order creation
+5. Orders can be listed using pagination
 6. Orders can be retrieved by ID or by client
 
 ---
 
 ## Project Structure
 
-- **Entities (Domain)**:
+- **Controllers**
+  - Handle HTTP requests and responses
+  - Validate input using DTOs
+- **Services**
+  - Encapsulate business rules
+  - Coordinate domain logic and repositories
+- **Domain (Entities)**
   - `Client`
   - `Product`
   - `Order`
-- **Value Objects**:
+- **Value Objects**
   - `OrderItem`
-- **DTOs**:
+- **DTOs**
+  - `CreateClientRequest`
+  - `CreateProductRequest`
   - `CreateOrderRequest`
   - `CreateOrderItemRequest`
-  - `OrderRequest`
-- **Repositories**:
+  - `UpdateProductRequest`
+  - `UpdateClientRequest`
+  - `ClientResponse`
+  - `OrderResponse`
+  - `ProductResponse`
+- **Repositories**
   - Spring Data MongoDB repositories
-- **Controllers**:
-  - Responsible for request handling and orchestration
-
-> The project intentionally does not use a Service layer yet, to clearly understand controller responsibilities before refactoring to a full DDD architecture.
 
 ---
 
 ## Architectural Decisions
 
-- **DDD-inspired modeling**:
-  - `Order` is the aggregate root
-  - `OrderItem` is a Value Object
-- **DTO-based API design** to avoid exposing domain entities
-- **BigDecimal** used for all monetary calculations
-- **MongoDB document model** chosen for flexibility and aggregation use cases
-- Progressive refactoring mindset (controllers → services in future iterations)
+- **DDD-inspired design**
+  - `Order` as Aggregate Root
+  - `OrderItem` as a Value Object
+- **DTO-based API**
+  - Domain entities are not exposed directly
+- **Service layer**
+  - Controllers remain thin
+  - Business logic centralized
+- **MongoDB document modeling**
+  - Flexible structure for evolving requirements
+- **BigDecimal for monetary values**
+  - Avoids floating-point precision issues
 
 ---
 
 ## Validation Strategy
 
-- Validation at API boundaries (invalid IDs, empty item lists)
-- Explicit error handling using HTTP status codes
-- Clear separation between request models and domain models
+- Bean Validation at API boundaries
+- Business rule validation inside Services
+- Clear and explicit HTTP error responses
+- Empty results return empty pages instead of exceptions where applicable
 
 ---
 
@@ -87,27 +103,27 @@ The main goal of this project is to practice **Domain-Driven Design (DDD) concep
 
 AI was used as a **development assistant** to:
 - Review architectural decisions
-- Validate DDD concepts
-- Improve code clarity and structure
-- Support refactoring decisions
+- Validate best practices
+- Improve code readability and structure
+- Support refactoring and design evolution
 
 ---
 
 ## Overview
 
-This project consolidates important backend concepts such as:
+This project consolidates key backend concepts such as:
 
-- REST API design with DTOs
+- RESTful API design
+- DTO validation and mapping
 - Domain-driven modeling
 - MongoDB integration with Spring Data
-- Value Objects and Aggregates
-- Monetary precision using BigDecimal
-- Clean and evolvable architecture
+- Pagination and filtering
+- Clean architecture principles
 
-It serves as a strong foundation for future improvements, such as:
-- Introducing a Service layer
-- Adding transactional boundaries
-- Implementing more complex business rules
-- Migrating to a microservices or cloud-based architecture
+It serves as a solid foundation for future improvements, including:
+- Advanced business rules
+- Integration and unit tests
+- Security and authentication
+- Cloud deployment and scalability
 
 ---

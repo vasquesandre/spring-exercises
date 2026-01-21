@@ -26,8 +26,7 @@ public class ClientController {
     }
 
     @GetMapping
-    public Page<ClientResponse> getClients() {
-        Pageable pageable = PageRequest.of(0, 10);
+    public Page<ClientResponse> getClients(Pageable pageable) {
         return clientService.getClients(pageable)
                 .map(ClientResponse::new);
     }
@@ -39,24 +38,14 @@ public class ClientController {
     }
 
     @GetMapping("/name")
-    public Page<ClientResponse> getClientsByName(@RequestParam String name) {
-        Pageable pageable = PageRequest.of(0, 10);
+    public Page<ClientResponse> getClientsByName(@RequestParam String name, Pageable pageable) {
         return clientService.getClientsByNameContaining(name, pageable)
                 .map(ClientResponse::new);
     }
 
     @GetMapping("/cpf")
-    public Page<ClientResponse> getClientsByCpf(@RequestParam String cpf) {
-        Pageable pageable = PageRequest.of(0, 10);
+    public Page<ClientResponse> getClientsByCpf(@RequestParam String cpf, Pageable pageable) {
         return clientService.getClientsByCpfContaining(cpf, pageable)
-                .map(ClientResponse::new);
-    }
-
-    @GetMapping("/page/{pageNumber}/{pageSize}")
-    public Page<ClientResponse> getClientsByPage(@PathVariable int pageNumber, @PathVariable int pageSize) {
-        if(pageSize >= 20) pageSize = 20;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return clientService.getClients(pageable)
                 .map(ClientResponse::new);
     }
 

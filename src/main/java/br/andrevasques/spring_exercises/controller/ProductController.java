@@ -8,7 +8,6 @@ import br.andrevasques.spring_exercises.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +21,6 @@ public class ProductController {
     @PostMapping
     public ProductResponse save(@RequestBody @Valid CreateProductRequest dto) {
         Product saved = productService.createProduct(dto);
-
         return new ProductResponse(saved);
     }
 
@@ -35,7 +33,6 @@ public class ProductController {
     @GetMapping("/{id}")
     public ProductResponse getProductById(@PathVariable String id) {
         Product product = productService.getProductById(id);
-
         return new ProductResponse(product);
     }
 
@@ -48,7 +45,6 @@ public class ProductController {
     @PatchMapping("/{id}")
     public ProductResponse update(@PathVariable String id, @RequestBody UpdateProductRequest dto) {
         Product saved = productService.updateProductById(id, dto);
-
         return new ProductResponse(saved);
     }
 

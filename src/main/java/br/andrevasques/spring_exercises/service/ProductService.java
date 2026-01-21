@@ -28,7 +28,6 @@ public class ProductService {
                 dto.price(),
                 dto.discount()
         );
-
         return productRepository.save(product);
     }
 
@@ -47,7 +46,6 @@ public class ProductService {
     public Product updateProductById(String id, UpdateProductRequest dto) {
         Product product = findProductByIdOrThrow(id);
         product.update(dto.name(), dto.price(), dto.discount());
-
         return productRepository.save(product);
     }
 

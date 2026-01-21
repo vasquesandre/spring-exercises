@@ -40,9 +40,7 @@ public class ProductController {
     }
 
     @GetMapping("/name")
-    public Page<ProductResponse> getProductsByName(@RequestParam String name) {
-        Pageable pageable = PageRequest.of(0, 10);
-
+    public Page<ProductResponse> getProductsByName(@RequestParam String name, Pageable pageable) {
         return productService.getProductsByNameContaining(name, pageable)
                 .map(ProductResponse::new);
     }

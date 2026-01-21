@@ -35,8 +35,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public Page<OrderResponse> getOrders() {
-        Pageable pageable = PageRequest.of(0, 10);
+    public Page<OrderResponse> getOrders(Pageable pageable) {
         return orderService.getOrders(pageable)
                 .map(this::toOrderResponse);
     }
@@ -48,8 +47,7 @@ public class OrderController {
     }
 
     @GetMapping("/client")
-    public Page<OrderResponse> getOrdersByClientId(@RequestParam String clientId) {
-        Pageable pageable = PageRequest.of(0, 10);
+    public Page<OrderResponse> getOrdersByClientId(@RequestParam String clientId, Pageable pageable) {
         return orderService.getOrdersByClientId(clientId, pageable)
                 .map(this::toOrderResponse);
     }

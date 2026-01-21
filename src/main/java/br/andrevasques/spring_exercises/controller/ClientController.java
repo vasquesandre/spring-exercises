@@ -7,6 +7,7 @@ import br.andrevasques.spring_exercises.model.entitites.Client;
 import br.andrevasques.spring_exercises.model.entitites.Order;
 import br.andrevasques.spring_exercises.model.repositories.ClientRepository;
 import br.andrevasques.spring_exercises.model.repositories.OrderRepository;
+import br.andrevasques.spring_exercises.service.ClientService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,29 +26,11 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class ClientController {
 
     @Autowired
-    private ClientRepository clientRepository;
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    private Client findClientByIdOrThrow(String clientId) {
-        return clientRepository.findById(clientId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found using ID"));
-    }
-
-    private Client findClientByCpfOrThrow(String cpf) {
-        return clientRepository.findByCpfContaining(cpf).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found using CPF"));
-    }
-
-    private void checkIfOrdersListIsNotEmptyForClientDeletionOrThrow(Page<Order> orders) {
-        if(!orders.isEmpty()) {
-            throw new ResponseStatusException(CONFLICT, "There is already an order with that client id");
-        }
-    }
+    private ClientService clientService;
 
     @PostMapping
     public ClientRequest save(@RequestBody @Valid CreateClientRequest dto) {
-        Client client = new Client(dto.name(), dto.cpf());
-        Client saved = clientRepository.save(client);
+        Client saved = clientService.saveClient(dto);
         return new ClientRequest(
                 saved.getId(),
                 saved.getName(),
@@ -58,7 +41,7 @@ public class ClientController {
     @GetMapping
     public Page<ClientRequest> getClients() {
         Pageable pageable = PageRequest.of(0, 10);
-        return clientRepository.findAll(pageable)
+        return clientService.getClients(pageable)
                 .map(client -> new ClientRequest(
                         client.getId(),
                         client.getName(),
@@ -68,7 +51,7 @@ public class ClientController {
 
     @GetMapping("/{id}")
     public ClientRequest getClientById(@PathVariable String id) {
-        Client client = findClientByIdOrThrow(id);
+        Client client = clientService.getClientById(id);
         return new ClientRequest(
                 client.getId(),
                 client.getName(),
@@ -79,7 +62,7 @@ public class ClientController {
     @GetMapping("/name")
     public Page<ClientRequest> getClientsByName(@RequestParam String name) {
         Pageable pageable = PageRequest.of(0, 10);
-        return clientRepository.findByNameContaining(name, pageable)
+        return clientService.getClientsByNameContaining(name, pageable)
                 .map(client -> new ClientRequest(
                         client.getId(),
                         client.getName(),
@@ -88,20 +71,21 @@ public class ClientController {
     }
 
     @GetMapping("/cpf")
-    public ClientRequest getClientByCpf(@RequestParam String cpf) {
-        Client client = findClientByCpfOrThrow(cpf);
-        return new ClientRequest(
-                client.getId(),
-                client.getName(),
-                client.getCpf()
-        );
+    public Page<ClientRequest> getClientsByCpf(@RequestParam String cpf) {
+        Pageable pageable = PageRequest.of(0, 10);
+        return clientService.getClientsByCpfContaining(cpf, pageable)
+                .map(client -> new ClientRequest(
+                        client.getId(),
+                        client.getName(),
+                        client.getCpf()
+                ));
     }
 
     @GetMapping("/page/{pageNumber}/{pageSize}")
     public Page<ClientRequest> getClientsByPage(@PathVariable int pageNumber, @PathVariable int pageSize) {
         if(pageSize >= 20) pageSize = 20;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return clientRepository.findAll(pageable)
+        return clientService.getClients(pageable)
                 .map(client -> new ClientRequest(
                         client.getId(),
                         client.getName(),
@@ -111,9 +95,7 @@ public class ClientController {
 
     @PatchMapping("/{id}")
     public ClientRequest update(@PathVariable String id, @RequestBody UpdateClientRequest dto) {
-        Client client = findClientByIdOrThrow(id);
-        client.update(dto.name(), dto.cpf());
-        Client saved = clientRepository.save(client);
+        Client saved = clientService.update(id, dto);
         return new ClientRequest(
                 saved.getId(),
                 saved.getName(),
@@ -123,10 +105,6 @@ public class ClientController {
 
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable String id) {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Order> orders = orderRepository.findAllByClientId(id, pageable);
-        checkIfOrdersListIsNotEmptyForClientDeletionOrThrow(orders);
-        Client client = findClientByIdOrThrow(id);
-        clientRepository.delete(client);
+        clientService.deleteClientById(id);
     }
 }

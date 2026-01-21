@@ -8,4 +8,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 public interface OrderRepository extends MongoRepository<Order, String> {
     public Page<Order> findAllByClientId(String clientId, Pageable pageable);
+    public boolean existsOrderByClientId(String clientId);
 }

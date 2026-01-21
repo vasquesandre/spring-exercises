@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface ClientRepository extends MongoRepository<Client, String> {
     public Page<Client> findByNameContaining(String name, Pageable pageable);
-    public Optional<Client> findByCpfContaining(String cpf);
+    public Page<Client> findByCpfContaining(String cpf, Pageable pageable);
 }

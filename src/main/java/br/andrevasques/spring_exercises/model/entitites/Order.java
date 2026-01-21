@@ -13,11 +13,11 @@ public class Order {
     @Id
     private String id;
 
-    private Client client;
+    private String clientId;
     private List<OrderItem> items;
 
-    public Order(Client client) {
-        this.client = client;
+    public Order(String clientId) {
+        this.clientId = clientId;
         this.items = new ArrayList<>();
     }
 
@@ -36,12 +36,12 @@ public class Order {
         this.id = id;
     }
 
-    public Client getClient() {
-        return client;
+    public String getClient() {
+        return clientId;
     }
 
-    public void setClient(Client client) {
-        this.client = client;
+    public void setClient(String clientId) {
+        this.clientId = clientId;
     }
 
     public List<OrderItem> getItems() {

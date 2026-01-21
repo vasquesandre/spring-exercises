@@ -38,13 +38,21 @@ public class OrderController {
     @Autowired
     private ProductRepository productRepository;
 
+    private Client findClientByIdOrThrow(String clientId) {
+        return clientRepository.findById(clientId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found"));
+    }
+
+    private Order findOrderByIdOrThrow(String orderId) {
+        return orderRepository.findById(orderId).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found"));
+    }
+
     @PostMapping
     public OrderRequest save(@RequestBody CreateOrderRequest dto) {
         if(dto.clientId() == null || dto.items().isEmpty()) {
             throw new ResponseStatusException(BAD_REQUEST, "Client ID is null or items list is empty");
         }
-        Client client = clientRepository.findById(dto.clientId()).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Client not found."));
-        Order order = new Order(client);
+        Client client = findClientByIdOrThrow(dto.clientId());
+        Order order = new Order(client.getId());
         for (CreateOrderItemRequest createOrderItemRequest : dto.items()) {
             if(createOrderItemRequest.productId() == null) {
                 throw new ResponseStatusException(BAD_REQUEST, "Product ID is null");
@@ -65,7 +73,7 @@ public class OrderController {
         orderRepository.save(order);
         return new OrderRequest(
                 order.getId(),
-                order.getClient(),
+                client,
                 order.getItems()
         );
     }
@@ -75,19 +83,23 @@ public class OrderController {
         Pageable pageable = PageRequest.of(0, 10);
 
         return orderRepository.findAll(pageable)
-                .map(order -> new OrderRequest(
-                        order.getId(),
-                        order.getClient(),
-                        order.getItems()
-                ));
+                .map(order -> {
+                    Client client = findClientByIdOrThrow(order.getClient());
+                    return new OrderRequest(
+                            order.getId(),
+                            client,
+                            order.getItems()
+                    );
+                });
     }
 
     @GetMapping("/{id}")
     public OrderRequest getOrderById(@PathVariable String id) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found"));
+        Order order = findOrderByIdOrThrow(id);
+        Client client = findClientByIdOrThrow(order.getClient());
         return new OrderRequest(
                 order.getId(),
-                order.getClient(),
+                client,
                 order.getItems()
         );
     }
@@ -96,16 +108,20 @@ public class OrderController {
     public Page<OrderRequest> getOrdersByClientId(@RequestParam String clientId) {
         Pageable pageable = PageRequest.of(0, 10);
         return orderRepository.findAllByClientId(clientId, pageable)
-                .map(order -> new OrderRequest(
-                        order.getId(),
-                        order.getClient(),
-                        order.getItems()
-                ));
+                .map(order -> {
+                    Client client = findClientByIdOrThrow(order.getClient());
+
+                    return new OrderRequest(
+                            order.getId(),
+                            client,
+                            order.getItems()
+                    );
+                });
     }
 
     @DeleteMapping
     public void delete(@RequestParam String id) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Order not found."));
+        Order order = findOrderByIdOrThrow(id);
         orderRepository.delete(order);
     }
 
